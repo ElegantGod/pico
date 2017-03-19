@@ -167,7 +167,8 @@ void process_image(IplImage* frame, int draw)
 	if(draw)
 		for(i=0; i<ndetections; ++i)
 			if(rcsq[4*i+3]>=qthreshold) // check the confidence threshold
-				cvCircle(frame, cvPoint(rcsq[4*i+1], rcsq[4*i+0]), rcsq[4*i+2]/2, CV_RGB(255, 0, 0), 4, 8, 0); // we draw circles here since height-to-width ratio of the detected face regions is 1.0f
+				cvRectangle(frame, cvPoint(rcsq[4*i+1]-rcsq[4*i+2]/2, rcsq[4*i+0]-rcsq[4*i+2]/2),cvPoint(rcsq[4*i+1]+rcsq[4*i+2]/2, rcsq[4*i+0]+rcsq[4*i+2]/2), CV_RGB(0,255,255),4,8,0);
+				//cvCircle(frame, cvPoint(rcsq[4*i+1], rcsq[4*i+0]), rcsq[4*i+2]/2, CV_RGB(255, 0, 0), 4, 8, 0); // we draw circles here since height-to-width ratio of the detected face regions is 1.0f
 
 	// if the `verbose` flag is set, print the results to standard output
 	if(verbose)
@@ -178,7 +179,7 @@ void process_image(IplImage* frame, int draw)
 				printf("%d %d %d %f\n", (int)rcsq[4*i+0], (int)rcsq[4*i+1], (int)rcsq[4*i+2], rcsq[4*i+3]);
 
 		//
-		//printf("# %f\n", 1000.0f*t); // use '#' to ignore this line when parsing the output of the program
+		printf("# %f ms\n", 1000.0f*t); // use '#' to ignore this line when parsing the output of the program
 	}
 }
 
@@ -191,7 +192,7 @@ void process_webcam_frames()
 
 	int stop;
 
-	const char* windowname = "--------------------";
+	const char* windowname = "Face Detection";
 
 	//
 	capture = cvCaptureFromCAM(0);
@@ -201,7 +202,7 @@ void process_webcam_frames()
 		printf("# cannot initialize video capture ...\n");
 		return;
 	}
-
+	cvNamedWindow(windowname, 0);
 	// the main loop
 	framecopy = 0;
 	stop = 0;
@@ -218,7 +219,10 @@ void process_webcam_frames()
 			frame = 0;
 		}
 		else
+		{
 			frame = cvRetrieveFrame(capture, 1);
+			printf("width=%d,height=%d\n", frame->width, frame->height);	
+		}
 
 		// we terminate the loop if the user has pressed 'q'
 		if(!frame || key=='q')
@@ -337,7 +341,7 @@ int main(int argc, char* argv[])
 
 	usepyr = 0;
 	noclustering = 0;
-	verbose = 0;
+	verbose = 1;
 
 	//
 	input[0] = 0;
